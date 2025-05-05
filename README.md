@@ -2,32 +2,32 @@
 This project is a secure door access system using an RFID reader and a password check stored directly on the RFID card. Access is granted only when both the UID and the stored password are correct.
 
 # Features
--Secure Authentication using:
+- Secure Authentication using:
 
--RFID UID check
+- RFID UID check
 
--Password stored on RFID card (Block 16)
+- Password stored on RFID card (Block 16)
 
--LCD Display (16x2) via I2C for instructions and feedback
+- LCD Display (16x2) via I2C for instructions and feedback
 
--Servo Motor to control physical locking/unlocking
+- Servo Motor to control physical locking/unlocking
 
--Built with Arduino Uno R3 and MFRC522 RFID module
+- Built with Arduino Uno R3 and MFRC522 RFID module
 
--Compact and easy-to-use design
+- Compact and easy-to-use design
 
 # Components Used
--Arduino Uno R3
+- Arduino Uno R3
 
--MFRC522 RFID Module
+- MFRC522 RFID Module
 
--16x2 LCD Display with I2C
+- 16x2 LCD Display with I2C
 
--Servo Motor SG90
+- Servo Motor SG90
 
--Breadboard & Jumper wires
+- Breadboard & Jumper wires
 
--RFID Tag/Card (MIFARE Classic 1K)
+- RFID Tag/Card (MIFARE Classic 1K)
 
 # How it Works
 When powered on, the LCD displays: Mark your attendance or Scan your card.
