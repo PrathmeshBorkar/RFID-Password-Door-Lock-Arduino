@@ -85,24 +85,24 @@ Buzzer and LED indicators
 Before running the main project, you need to prepare your RFID card by writing a password and updating the access key.
 
 1. Write Password to Block 19
-You must write the password "Security" into Block 19 of your RFID card. You can do this using the write_password_and_key.ino sketch provided in this repository.
+  You must write the password "Security" into Block 19 of your RFID card. You can do this using the write_password_and_key.ino sketch provided in this repository.
 
 2. Set Custom Key A for Block 19
-The system uses a custom key (A1 B2 C3 D4 E5 F6) to read Block 19. Make sure you:
+  The system uses a custom key (A1 B2 C3 D4 E5 F6) to read Block 19. Make sure you:
 
-Upload the write_password_and_key.ino sketch to your Arduino.
+  Upload the write_password_and_key.ino sketch to your Arduino.
 
-Scan your card once.
+  Scan your card once.
 
-It will:
+  It will:
+  
+  Write "Security" to Block 19.
 
-Write "Security" to Block 19.
-
-Change Key A for Block 19 to A1 B2 C3 D4 E5 F6.
+  Change Key A for Block 19 to A1 B2 C3 D4 E5 F6.
 
 - Note: After this step, you cannot read Block 19 using the default key (FF FF FF FF FF FF). Only your Arduino code with the custom key can access it.
 
 3. Confirm Card Using NFC App (Optional)
-Use an app like NFC Tools (Android) to verify the card contents if needed:
+  Use an app like NFC Tools (Android) to verify the card contents if needed:
 
-You should see "Security" in Block 19 (if your phone supports MIFARE Classic).
+  You should see "Security" in Block 19 (if your phone supports MIFARE Classic).
