@@ -1,65 +1,77 @@
 #include <SPI.h>
 #include <MFRC522.h>
 
-#define RST_PIN 9
 #define SS_PIN 10
+#define RST_PIN 9
+MFRC522 mfrc522(SS_PIN, RST_PIN);
 
-MFRC522 rfid(SS_PIN, RST_PIN);
-MFRC522::MIFARE_Key key;
+MFRC522::MIFARE_Key defaultKey;
+MFRC522::MIFARE_Key newKey;
 
-byte block = 19;
-String password = "Security"; // 8 characters max for simplicity
-byte customKeyA[6] = {0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6};
+const byte block = 16;
 
 void setup() {
   Serial.begin(9600);
   SPI.begin();
-  rfid.PCD_Init();
-  Serial.println("Scan your card to write password...");
+  mfrc522.PCD_Init();
+  Serial.println("Scan the RFID card to write password and set key...");
 
-  for (byte i = 0; i < 6; i++) {
-    key.keyByte[i] = 0xFF; // default factory key
-  }
+  // Default key (factory reset)
+  for (byte i = 0; i < 6; i++) defaultKey.keyByte[i] = 0xFF;
+
+  // Your custom key
+  byte tempKey[6] = {0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6};
+  for (byte i = 0; i < 6; i++) newKey.keyByte[i] = tempKey[i];
 }
 
 void loop() {
-  if (!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial()) return;
+  if (!mfrc522.PICC_IsNewCardPresent() || !mfrc522.PICC_ReadCardSerial()) return;
 
-  // Authenticate block 19
-  if (rfid.PICC_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, block, &key, &(rfid.uid)) != MFRC522::STATUS_OK) {
-    Serial.println("Authentication failed");
+  Serial.print("Card UID: ");
+  for (byte i = 0; i < mfrc522.uid.size; i++) {
+    Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+    Serial.print(mfrc522.uid.uidByte[i], HEX);
+  }
+  Serial.println();
+
+  MFRC522::StatusCode status;
+
+  // Authenticate using default key
+  status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, block, &defaultKey, &(mfrc522.uid));
+  if (status != MFRC522::STATUS_OK) {
+    Serial.print("Authentication failed: ");
+    Serial.println(mfrc522.GetStatusCodeName(status));
     return;
   }
 
-  // Write password to block 19
-  byte buffer[16];
-  for (int i = 0; i < 16; i++) buffer[i] = 0x00; // Clear all first
-  for (int i = 0; i < password.length(); i++) buffer[i] = password[i];
-
-  MFRC522::StatusCode status = rfid.MIFARE_Write(block, buffer, 16);
-  if (status == MFRC522::STATUS_OK) {
-    Serial.println("Password written to block 19");
-  } else {
-    Serial.print("Write failed: "); Serial.println(rfid.GetStatusCodeName(status));
+  // Write "Security" to block 16
+  byte dataBlock[16] = {'S', 'e', 'c', 'u', 'r', 'i', 't', 'y', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
+  status = mfrc522.MIFARE_Write(block, dataBlock, 16);
+  if (status != MFRC522::STATUS_OK) {
+    Serial.print("Write failed: ");
+    Serial.println(mfrc522.GetStatusCodeName(status));
+    return;
   }
+  Serial.println("✅ 'Security' written to Block 16.");
 
-  // Change Key A of block 19 to custom key
-  byte trailerBlock = 23; // Trailer block for block 19
+  // Now write new key to sector trailer (Block 19 for sector 4)
+  byte trailerBlock = 19;
   byte sectorTrailer[16] = {
-    customKeyA[0], customKeyA[1], customKeyA[2], customKeyA[3], customKeyA[4], customKeyA[5], // Key A
-    0xFF, 0x07, 0x80, // Access Bits
-    0x69, 0x69, 0x69, // Unused
-    0xFF, 0xFF, 0xFF, 0xFF // Key B (optional, not used)
+    0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6,  // Key A
+    0xFF, 0x07, 0x80,                    // Access bits
+    0x69,                                // User data
+    0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6   // Key B (optional)
   };
 
-  status = rfid.MIFARE_Write(trailerBlock, sectorTrailer, 16);
-  if (status == MFRC522::STATUS_OK) {
-    Serial.println("Key A updated for block 19");
+  status = mfrc522.MIFARE_Write(trailerBlock, sectorTrailer, 16);
+  if (status != MFRC522::STATUS_OK) {
+    Serial.print("Failed to write sector trailer: ");
+    Serial.println(mfrc522.GetStatusCodeName(status));
   } else {
-    Serial.print("Failed to write key: "); Serial.println(rfid.GetStatusCodeName(status));
+    Serial.println("✅ New key written successfully to sector trailer (Block 19).");
   }
 
-  rfid.PICC_HaltA();
-  rfid.PCD_StopCrypto1();
+  mfrc522.PICC_HaltA();
+  mfrc522.PCD_StopCrypto1();
   delay(3000);
 }
