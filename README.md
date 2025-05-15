@@ -106,3 +106,58 @@ Before running the main project, you need to prepare your RFID card by writing a
   Use an app like NFC Tools (Android) to verify the card contents if needed:
 
   You should see "Security" in Block 19 (if your phone supports MIFARE Classic).
+
+
+## 🔌 Hardware Configuration
+
+This project uses an Arduino Uno R3 with an RFID module (MFRC522), a 16x2 LCD with I2C, and an SG90 servo motor. Below are the wiring details:
+
+
+### 📘 MFRC522 RFID Module
+
+| RFID Pin     | Arduino Pin |
+| ------------ | ----------- |
+| **SDA (SS)** | D10         |
+| **SCK**      | D13         |
+| **MOSI**     | D11         |
+| **MISO**     | D12         |
+| **RST**      | D9          |
+| **GND**      | GND         |
+| **3.3V**     | 3.3V        |
+
+> ⚠️ **Note:** The MFRC522 module must be powered with **3.3V** — connecting it to 5V may damage it.
+
+
+### 📗 16x2 LCD with I2C
+
+| LCD Pin | Arduino Pin |
+| ------- | ----------- |
+| **GND** | GND         |
+| **VCC** | 5V          |
+| **SDA** | A4          |
+| **SCL** | A5          |
+
+> 💡 The default I2C address is usually **`0x27`**. If your LCD does not display anything, try address `0x3F`.
+
+
+### 📙 SG90 Servo Motor
+
+| Servo Wire                 | Arduino Pin |
+| -------------------------- | ----------- |
+| **Signal** (Orange/Yellow) | D3          |
+| **VCC** (Red)              | 5V          |
+| **GND** (Brown/Black)      | GND         |
+
+> ⚠️ **Important:** The servo can draw a lot of power. If your Arduino resets or LCD flickers:
+>
+> * Add a **1000μF capacitor** between 5V and GND.
+> * Or use a **separate 5V power source** for the servo, with common GND.
+
+### 🧠 Summary of Arduino Pin Usage
+
+| Component          | Pin(s) Used                                            |
+| ------------------ | ------------------------------------------------------ |
+| **RFID (MFRC522)** | D10 (SDA), D9 (RST), D11 (MOSI), D12 (MISO), D13 (SCK) |
+| **LCD (I2C)**      | A4 (SDA), A5 (SCL)                                     |
+| **Servo Motor**    | D3                                                     |
+
